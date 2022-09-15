@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import 'models/product_list.dart';
 import 'pages/product_detail_page.dart';
 import 'pages/products_overview_page.dart';
 import 'utils/app_routes.dart';
@@ -14,25 +16,28 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Shop',
-      theme: ThemeData(
-        colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Colors.pink[900],
-              secondary: Colors.white,
-              tertiary: Colors.black87,
-            ),
-        appBarTheme: Theme.of(context).appBarTheme.copyWith(
-              centerTitle: true,
-            ),
-        fontFamily: 'Lato',
+    return ChangeNotifierProvider(
+      create: (_) => ProductList(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Shop',
+        theme: ThemeData(
+          colorScheme: Theme.of(context).colorScheme.copyWith(
+                primary: Colors.pink[900],
+                secondary: Colors.white,
+                tertiary: Colors.black87,
+              ),
+          appBarTheme: Theme.of(context).appBarTheme.copyWith(
+                centerTitle: true,
+              ),
+          fontFamily: 'Lato',
+        ),
+        routes: {
+          AppRoutes.home: (_) => ProductsOverviewPage(),
+          AppRoutes.productsOverview: (_) => ProductsOverviewPage(),
+          AppRoutes.productDetail: (_) => const ProductDetailPage(),
+        },
       ),
-      routes: {
-        AppRoutes.home: (_) => ProductsOverviewPage(),
-        AppRoutes.productsOverview: (_) => ProductsOverviewPage(),
-        AppRoutes.productDetail: (_) => const ProductDetailPage(),
-      },
     );
   }
 }
