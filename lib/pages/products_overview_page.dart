@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../components/product_grid.dart';
+import '../components/search.dart';
+import '../models/product.dart';
+import '../models/product_list.dart';
 
 enum FilterOptions {
   favorites,
@@ -19,6 +23,10 @@ class _ProductsOverviewPageState extends State<ProductsOverviewPage> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<ProductList>(context);
+
+    final List<Product> loadedProducts = provider.items;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Store'),
@@ -35,16 +43,30 @@ class _ProductsOverviewPageState extends State<ProductsOverviewPage> {
                 child: Text('All'),
               ),
             ],
-            onSelected: (FilterOptions selectedFilter) {
-              setState(() {
-                _showFavoriteOnly = selectedFilter == FilterOptions.favorites;
-              });
-            },
+            onSelected: (FilterOptions selectedFilter) => setState(() {
+              _showFavoriteOnly = selectedFilter == FilterOptions.favorites;
+            }),
           )
         ],
       ),
-      body: ProductGrid(
-        showFavoriteOnly: _showFavoriteOnly,
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            if (loadedProducts.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Search(
+                  onSearch: provider.onSearchProduct,
+                ),
+              ),
+            Expanded(
+              child: ProductGrid(
+                showFavoriteOnly: _showFavoriteOnly,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
