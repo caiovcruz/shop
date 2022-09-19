@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shop/utils/app_routes.dart';
 
+import '../components/badge.dart';
 import '../components/product_grid.dart';
 import '../components/search.dart';
-import '../models/product.dart';
+import '../models/cart.dart';
 import '../models/product_list.dart';
 
 enum FilterOptions {
@@ -25,11 +27,13 @@ class _ProductsOverviewPageState extends State<ProductsOverviewPage> {
   Widget build(BuildContext context) {
     final provider = Provider.of<ProductList>(context);
 
-    final List<Product> loadedProducts = provider.items;
-
     return Scaffold(
+      drawer: const Drawer(),
       appBar: AppBar(
-        title: const Text('My Store'),
+        leadingWidth: 20,
+        title: Search(
+          onSearch: provider.onSearchProduct,
+        ),
         actions: [
           PopupMenuButton(
             icon: const Icon(Icons.filter_alt),
@@ -46,27 +50,21 @@ class _ProductsOverviewPageState extends State<ProductsOverviewPage> {
             onSelected: (FilterOptions selectedFilter) => setState(() {
               _showFavoriteOnly = selectedFilter == FilterOptions.favorites;
             }),
-          )
+          ),
+          Consumer<Cart>(
+            child: IconButton(
+              onPressed: () => Navigator.of(context).pushNamed(AppRoutes.cart),
+              icon: const Icon(Icons.shopping_cart),
+            ),
+            builder: (ctx, cart, child) => Badge(
+              value: cart.itemsCount.toString(),
+              child: child!,
+            ),
+          ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            if (loadedProducts.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Search(
-                  onSearch: provider.onSearchProduct,
-                ),
-              ),
-            Expanded(
-              child: ProductGrid(
-                showFavoriteOnly: _showFavoriteOnly,
-              ),
-            ),
-          ],
-        ),
+      body: ProductGrid(
+        showFavoriteOnly: _showFavoriteOnly,
       ),
     );
   }

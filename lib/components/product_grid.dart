@@ -22,6 +22,7 @@ class ProductGrid extends StatelessWidget {
     );
 
     return GridView.builder(
+      padding: const EdgeInsets.all(10),
       itemCount: searchedItems.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,

@@ -25,7 +25,7 @@ class ProductList with ChangeNotifier {
     if (_search.isNotEmpty) {
       searchedItems = searchedItems
           .where((prod) =>
-              prod.title.toLowerCase().contains(_search.toLowerCase()) ||
+              prod.name.toLowerCase().contains(_search.toLowerCase()) ||
               prod.description.toLowerCase().contains(_search.toLowerCase()))
           .toList();
     }
