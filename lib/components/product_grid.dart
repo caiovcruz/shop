@@ -16,6 +16,7 @@ class ProductGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ProductList>(context);
+    final size = MediaQuery.of(context).size;
 
     final List<Product> searchedItems = provider.itemsWithFilters(
       showFavoriteOnly: showFavoriteOnly,
@@ -24,9 +25,9 @@ class ProductGrid extends StatelessWidget {
     return GridView.builder(
       padding: const EdgeInsets.all(10),
       itemCount: searchedItems.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 3 / 2,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: size.width > 480 ? 3 : 2,
+        childAspectRatio: (size.width > 480 ? 4 : 3) / 4,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
       ),

@@ -11,42 +11,56 @@ class ProductItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final product = Provider.of<Product>(context, listen: false);
-    final cart = Provider.of<Cart>(context, listen: false);
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: const BorderRadius.only(
+        bottomLeft: Radius.circular(15),
+        bottomRight: Radius.circular(15),
+      ),
       child: GridTile(
-        footer: GridTileBar(
-          backgroundColor:
-              Theme.of(context).colorScheme.tertiary.withOpacity(0.8),
-          leading: Consumer<Product>(builder: (cxt, product, _) {
-            return IconButton(
-              onPressed: () => product.toggleFavorite(),
-              icon: Icon(
-                  product.isFavorite ? Icons.favorite : Icons.favorite_border),
-              color: Theme.of(context).colorScheme.secondary,
-            );
-          }),
-          title: Text(
-            product.name,
-            textAlign: TextAlign.center,
-          ),
-          trailing: IconButton(
-            onPressed: () => cart.addItem(product),
-            icon: const Icon(Icons.shopping_cart),
-            color: Theme.of(context).colorScheme.secondary,
-          ),
-        ),
         child: GestureDetector(
-          onTap: () {
-            Navigator.of(context).pushNamed(
-              AppRoutes.productDetail,
-              arguments: product,
-            );
-          },
-          child: Image.network(
-            product.imageUrl,
-            fit: BoxFit.cover,
+          onTap: () => Navigator.of(context).pushNamed(
+            AppRoutes.productDetail,
+            arguments: product,
+          ),
+          child: Column(
+            children: [
+              Expanded(
+                child: Container(
+                  height: double.infinity,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.tertiary,
+                      width: 5,
+                    ),
+                  ),
+                  child: Image.network(
+                    product.imageUrl,
+                  ),
+                ),
+              ),
+              GridTileBar(
+                backgroundColor: Theme.of(context).colorScheme.tertiary,
+                title: Text(
+                  product.name,
+                  textAlign: TextAlign.center,
+                ),
+                subtitle: Text(
+                  'R\$${product.price.toStringAsFixed(2)}',
+                  textAlign: TextAlign.center,
+                ),
+                trailing: Consumer<Product>(builder: (cxt, product, _) {
+                  return IconButton(
+                    onPressed: () => product.toggleFavorite(),
+                    icon: Icon(product.isFavorite
+                        ? Icons.favorite
+                        : Icons.favorite_border),
+                    color: Theme.of(context).colorScheme.secondary,
+                  );
+                }),
+              ),
+            ],
           ),
         ),
       ),

@@ -24,7 +24,8 @@ class Cart with ChangeNotifier {
     return totalAmount;
   }
 
-  void addItem(Product product) {
+  void addItem(Product product,
+      {int? quantity, bool isAbsolutQuantity = false}) {
     if (_items.containsKey(product.id)) {
       _items.update(
         product.id,
@@ -32,7 +33,11 @@ class Cart with ChangeNotifier {
           id: existingItem.id,
           productId: existingItem.productId,
           name: existingItem.name,
-          quantity: existingItem.quantity + 1,
+          quantity: quantity != null
+              ? (isAbsolutQuantity
+                  ? quantity
+                  : existingItem.quantity + quantity)
+              : existingItem.quantity,
           price: existingItem.price,
         ),
       );
@@ -43,7 +48,7 @@ class Cart with ChangeNotifier {
           id: Random().nextDouble().toString(),
           productId: product.id,
           name: product.name,
-          quantity: 1,
+          quantity: quantity ?? 1,
           price: product.price,
         ),
       );
