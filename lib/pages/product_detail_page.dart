@@ -81,9 +81,28 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             ),
             ElevatedButton.icon(
               icon: const Icon(Icons.shopping_cart),
-              label: const Text('BUY',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              onPressed: () => cart.addItem(product, quantity: itemQuantity),
+              label: const Text(
+                'BUY',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: const Text('Product successfully added to cart!'),
+                  duration: const Duration(seconds: 2),
+                  action: SnackBarAction(
+                    label: 'UNDO',
+                    textColor: Theme.of(context).colorScheme.primary,
+                    onPressed: () => cart.removeSingleItem(
+                      product.id,
+                      quantity: itemQuantity,
+                    ),
+                  ),
+                ));
+                cart.addItem(product, quantity: itemQuantity);
+              },
             ),
           ],
         ),

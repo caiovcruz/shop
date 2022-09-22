@@ -15,6 +15,8 @@ class ProductList with ChangeNotifier {
 
   List<Product> get items => [..._items];
 
+  int get itemsCount => _items.length;
+
   List<Product> itemsWithFilters({bool showFavoriteOnly = false}) {
     var searchedItems = items;
 

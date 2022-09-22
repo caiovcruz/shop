@@ -31,7 +31,7 @@ class _ProductsOverviewPageState extends State<ProductsOverviewPage> {
     return Scaffold(
       drawer: const AppDrawer(),
       appBar: AppBar(
-        leadingWidth: 20,
+        leadingWidth: 25,
         title: Search(
           onSearch: provider.onSearchProduct,
         ),

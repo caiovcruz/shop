@@ -44,6 +44,7 @@ class _QuantityState extends State<Quantity> {
     setState(() {
       if (quantity > 1) {
         quantity = value;
+        widget.onQuantityChange(quantity);
       }
     });
   }
@@ -70,7 +71,7 @@ class _QuantityState extends State<Quantity> {
             GestureDetector(
               onTap: () => showDialog(
                 context: context,
-                builder: (context) => showSetQuantityModal(context),
+                builder: (ctx) => showSetQuantityModal(ctx),
               ),
               child: Container(
                 padding:

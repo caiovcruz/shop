@@ -22,7 +22,7 @@ class OrdersPage extends StatelessWidget {
       ),
       body: ListView.builder(
         itemCount: orders.itemsCount,
-        itemBuilder: (context, index) =>
+        itemBuilder: (ctx, index) =>
             OrderWidget(order: orders.items[index]),
       ),
     );
