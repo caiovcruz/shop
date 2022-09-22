@@ -19,7 +19,7 @@ class CartPage extends StatelessWidget {
       ),
       body: Column(
         children: [
-          CartTotal(total: cart.totalAmount),
+          CartTotal(cart: cart),
           Expanded(
             child: ListView.builder(
               itemCount: items.length,
