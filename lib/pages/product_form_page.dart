@@ -1,8 +1,10 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../components/image_modal.dart';
 import '../models/product.dart';
+import '../models/product_list.dart';
+import '../utils/text_field_validator.dart';
 
 class ProductFormPage extends StatefulWidget {
   const ProductFormPage({Key? key}) : super(key: key);
@@ -19,12 +21,31 @@ class _ProductFormPageState extends State<ProductFormPage> {
   final _imageUrlController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
-  final _formData = Map<String, Object>();
+  final _formData = <String, Object>{};
 
   @override
   void initState() {
     super.initState();
     _imageUrlFocus.addListener(updateImage);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (_formData.isEmpty) {
+      final product = ModalRoute.of(context)?.settings.arguments as Product?;
+
+      if (product != null) {
+        _formData['id'] = product.id;
+        _formData['name'] = product.name;
+        _formData['price'] = product.price;
+        _formData['description'] = product.description;
+        _formData['imageUrl'] = product.imageUrl;
+
+        _imageUrlController.text = product.imageUrl;
+      }
+    }
   }
 
   @override
@@ -41,16 +62,17 @@ class _ProductFormPageState extends State<ProductFormPage> {
   }
 
   void _submitForm() {
-    if (_formKey.currentState?.validate() == true) {
+    if (_formKey.currentState?.validate() ?? false) {
       _formKey.currentState?.save();
 
-      final newProduct = Product(
-        id: Random().nextDouble().toString(),
-        name: _formData['name'] as String,
-        description: _formData['description'] as String,
-        price: _formData['price'] as double,
-        imageUrl: _formData['imageUrl'] as String,
-      );
+      Provider.of<ProductList>(context, listen: false).saveProduct(_formData);
+
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Product successfully created!'),
+        duration: Duration(seconds: 2),
+      ));
+
+      Navigator.of(context).pop();
     }
   }
 
@@ -76,13 +98,16 @@ class _ProductFormPageState extends State<ProductFormPage> {
           child: ListView(
             children: [
               TextFormField(
+                initialValue: _formData['name']?.toString(),
                 decoration: const InputDecoration(labelText: 'Name'),
                 textInputAction: TextInputAction.next,
                 onFieldSubmitted: (_) =>
                     FocusScope.of(context).requestFocus(_priceFocus),
                 onSaved: (name) => _formData['name'] = name ?? '',
+                validator: nameValidator,
               ),
               TextFormField(
+                initialValue: _formData['price']?.toString(),
                 decoration: const InputDecoration(labelText: 'Price'),
                 textInputAction: TextInputAction.next,
                 focusNode: _priceFocus,
@@ -93,8 +118,10 @@ class _ProductFormPageState extends State<ProductFormPage> {
                     FocusScope.of(context).requestFocus(_descriptionFocus),
                 onSaved: (price) =>
                     _formData['price'] = double.parse(price ?? '0'),
+                validator: priceValidator,
               ),
               TextFormField(
+                initialValue: _formData['description']?.toString(),
                 decoration: const InputDecoration(labelText: 'Description'),
                 focusNode: _descriptionFocus,
                 keyboardType: TextInputType.multiline,
@@ -103,6 +130,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
                     FocusScope.of(context).requestFocus(_imageUrlFocus),
                 onSaved: (description) =>
                     _formData['description'] = description ?? '',
+                validator: descriptionValidator,
               ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -115,28 +143,33 @@ class _ProductFormPageState extends State<ProductFormPage> {
                       textInputAction: TextInputAction.done,
                       focusNode: _imageUrlFocus,
                       keyboardType: TextInputType.url,
-                      onFieldSubmitted: (_) => _submitForm(),
                       onSaved: (imageUrl) =>
                           _formData['imageUrl'] = imageUrl ?? '',
+                      validator: imageUrlValidator,
                     ),
                   ),
-                  Container(
-                    height: 100,
-                    width: 100,
-                    margin: const EdgeInsets.only(top: 10, left: 10),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.grey,
-                        width: 1,
+                  ImageModal(
+                    imageName: _formData['name']?.toString() ??
+                        'Image loaded from URL',
+                    imageUrl: _imageUrlController.text,
+                    child: Container(
+                      height: 100,
+                      width: 100,
+                      margin: const EdgeInsets.only(top: 10, left: 10),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.grey,
+                          width: 1,
+                        ),
                       ),
+                      alignment: Alignment.center,
+                      child: _imageUrlController.text.isEmpty
+                          ? const Text('Enter an URL')
+                          : FittedBox(
+                              fit: BoxFit.contain,
+                              child: Image.network(_imageUrlController.text),
+                            ),
                     ),
-                    alignment: Alignment.center,
-                    child: _imageUrlController.text.isEmpty
-                        ? const Text('Enter an URL')
-                        : FittedBox(
-                            fit: BoxFit.cover,
-                            child: Image.network(_imageUrlController.text),
-                          ),
                   ),
                 ],
               ),
@@ -145,5 +178,78 @@ class _ProductFormPageState extends State<ProductFormPage> {
         ),
       ),
     );
+  }
+
+  String? nameValidator(name) {
+    final trimmedName = (name ?? '').trim();
+
+    final validations = [
+      TextFieldValidator.required('Description', trimmedName),
+      TextFieldValidator.minLength('Description', trimmedName, 3),
+    ];
+
+    for (var validation in validations) {
+      if (validation != null) {
+        return validation;
+      }
+    }
+
+    return null;
+  }
+
+  String? descriptionValidator(description) {
+    final trimmedDescription = (description ?? '').trim();
+
+    final validations = [
+      TextFieldValidator.required('Description', trimmedDescription),
+      TextFieldValidator.minLength('Description', trimmedDescription, 10),
+    ];
+
+    for (var validation in validations) {
+      if (validation != null) {
+        return validation;
+      }
+    }
+
+    return null;
+  }
+
+  String? priceValidator(price) {
+    final trimmedPrice = (price ?? '').trim();
+
+    final validations = [
+      TextFieldValidator.required('Price', trimmedPrice),
+      TextFieldValidator.greaterThan('Price', trimmedPrice, 0),
+    ];
+
+    for (var validation in validations) {
+      if (validation != null) {
+        return validation;
+      }
+    }
+
+    return null;
+  }
+
+  String? imageUrlValidator(imageUrl) {
+    final trimmedImageUrl = (imageUrl ?? '').trim();
+
+    final validations = [
+      TextFieldValidator.required('Image URL', trimmedImageUrl),
+      TextFieldValidator.validUrl('Image URL', trimmedImageUrl),
+      TextFieldValidator.allowedFileExtensions('Image URL', trimmedImageUrl, [
+        '.png',
+        '.jpg',
+        '.jpeg',
+      ]),
+    ];
+
+    for (var validation in validations) {
+      if (validation != null) {
+        return validation;
+      }
+    }
+
+    return null;
   }
 }

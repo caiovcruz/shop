@@ -31,10 +31,10 @@ class _ProductsOverviewPageState extends State<ProductsOverviewPage> {
     return Scaffold(
       drawer: const AppDrawer(),
       appBar: AppBar(
-        leadingWidth: 25,
         title: Search(
           onSearch: provider.onSearchProduct,
         ),
+        centerTitle: true,
         actions: [
           PopupMenuButton(
             icon: const Icon(Icons.filter_alt),

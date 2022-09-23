@@ -62,11 +62,21 @@ class _OrderWidgetState extends State<OrderWidget> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            Text(
-                              '${product.quantity}x R\$${product.price}',
-                              style: const TextStyle(
-                                fontSize: 18,
-                                color: Colors.grey,
+                            FittedBox(
+                              child: Text(
+                                '${product.quantity}x R\$${product.price}',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                            FittedBox(
+                              child: Text(
+                                'R\$${(product.quantity * product.price).toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                ),
                               ),
                             ),
                           ],

@@ -5,6 +5,7 @@ import 'package:collection/collection.dart';
 import '../models/cart.dart';
 import '../models/cart_item.dart';
 import '../models/product_list.dart';
+import 'confirmation_dialog.dart';
 import 'quantity.dart';
 
 class CartItemWidget extends StatelessWidget {
@@ -56,29 +57,9 @@ class CartItemWidget extends StatelessWidget {
       confirmDismiss: (_) {
         return showDialog<bool>(
           context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text('Are you sure?'),
-            content: const Text(
-                'Do you really want to remove this item from the cart?'),
-            actions: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () => Navigator.of(ctx).pop(false),
-                      child: const Text('NO'),
-                    ),
-                  ),
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () => Navigator.of(ctx).pop(true),
-                      child: const Text('YES'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+          builder: (ctx) => const ConfirmationDialog(
+            warningWidget:
+                Text('Do you really want to remove this item from the cart?'),
           ),
         );
       },
@@ -94,7 +75,10 @@ class CartItemWidget extends StatelessWidget {
             leading: CircleAvatar(
               backgroundColor: Theme.of(context).colorScheme.primary,
               child: product?.imageUrl != null
-                  ? Image.network(product!.imageUrl)
+                  ? Image.network(
+                      product!.imageUrl,
+                      fit: BoxFit.contain,
+                    )
                   : const Icon(
                       Icons.image_not_supported_outlined,
                       color: Colors.white,

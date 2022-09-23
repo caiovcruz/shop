@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
 
 import 'cart_item.dart';
 import 'product.dart';
@@ -30,13 +31,13 @@ class Cart with ChangeNotifier {
         (existingItem) => CartItem(
           id: existingItem.id,
           productId: existingItem.productId,
-          name: existingItem.name,
+          name: product.name,
           quantity: quantity != null
               ? (isAbsolutQuantity
                   ? quantity
                   : existingItem.quantity + quantity)
               : existingItem.quantity,
-          price: existingItem.price,
+          price: product.price,
         ),
       );
     } else {
@@ -77,6 +78,21 @@ class Cart with ChangeNotifier {
       }
 
       notifyListeners();
+    }
+  }
+
+  void updateCart(List<Product> products) {
+    for (var cartItem in _items.values.toList()) {
+      final product =
+          products.firstWhereOrNull((prod) => prod.id == cartItem.productId);
+
+      if (product != null) {
+        if (cartItem.name != product.name || cartItem.price != product.price) {
+          addItem(product);
+        }
+      } else {
+        removeItem(cartItem.productId);
+      }
     }
   }
 

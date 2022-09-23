@@ -36,6 +36,7 @@ class ProductGridItem extends StatelessWidget {
                   ),
                   child: Image.network(
                     product.imageUrl,
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),
