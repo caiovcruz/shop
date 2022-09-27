@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../exceptions/http_exception.dart';
 import '../models/product.dart';
 import '../utils/app_routes.dart';
 
@@ -10,6 +11,7 @@ class ProductGridItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final product = Provider.of<Product>(context, listen: false);
+    final messenger = ScaffoldMessenger.of(context);
 
     return ClipRRect(
       borderRadius: const BorderRadius.only(
@@ -52,7 +54,23 @@ class ProductGridItem extends StatelessWidget {
                 ),
                 trailing: Consumer<Product>(builder: (cxt, product, _) {
                   return IconButton(
-                    onPressed: () => product.toggleFavorite(),
+                    onPressed: () async {
+                      try {
+                        await product.toggleFavorite();
+
+                        messenger.showSnackBar(SnackBar(
+                          content: Text(product.isFavorite
+                              ? 'Product favorited!'
+                              : 'Product removed from favorites!'),
+                          duration: const Duration(seconds: 2),
+                        ));
+                      } on HttpException catch (error) {
+                        messenger.showSnackBar(SnackBar(
+                          content: Text(error.msg),
+                          duration: const Duration(seconds: 2),
+                        ));
+                      }
+                    },
                     icon: Icon(product.isFavorite
                         ? Icons.favorite
                         : Icons.favorite_border),

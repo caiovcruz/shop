@@ -14,6 +14,8 @@ class ImageModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return GestureDetector(
       onTap: () => showDialog(
         context: context,
@@ -37,8 +39,8 @@ class ImageModal extends StatelessWidget {
                 ),
               ),
               Container(
-                height: 300,
-                width: 300,
+                height: size.width * 0.7,
+                width: size.width * 0.7,
                 decoration: BoxDecoration(
                   border: imageUrl.isEmpty
                       ? Border.all(

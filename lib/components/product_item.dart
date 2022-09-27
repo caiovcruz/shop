@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../exceptions/http_exception.dart';
 import '../models/product.dart';
 import '../models/product_list.dart';
 import '../utils/app_routes.dart';
@@ -17,6 +18,8 @@ class ProductItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final messenger = ScaffoldMessenger.of(context);
+
     return ListTile(
       onTap: () => Navigator.of(context).pushNamed(
         AppRoutes.productForm,
@@ -40,10 +43,22 @@ class ProductItem extends StatelessWidget {
             warningWidget: Text(
                 'Do you really want to remove this product from the catalog?'),
           ),
-        ).then((isRemove) {
+        ).then((isRemove) async {
           if (isRemove ?? false) {
-            Provider.of<ProductList>(context, listen: false)
-                .removeProduct(product);
+            try {
+              await Provider.of<ProductList>(context, listen: false)
+                  .removeProduct(product);
+
+              messenger.showSnackBar(const SnackBar(
+                content: Text('Product successfully removed!'),
+                duration: Duration(seconds: 2),
+              ));
+            } on HttpException catch (error) {
+              messenger.showSnackBar(SnackBar(
+                content: Text(error.msg),
+                duration: const Duration(seconds: 2),
+              ));
+            }
           }
         }),
       ),

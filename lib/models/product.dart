@@ -1,4 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+import '../exceptions/http_exception.dart';
+import '../utils/constants.dart';
 
 class Product with ChangeNotifier {
   final String id;
@@ -17,8 +23,30 @@ class Product with ChangeNotifier {
     this.isFavorite = false,
   });
 
-  void toggleFavorite() {
+  void _toggleFavorite() {
     isFavorite = !isFavorite;
     notifyListeners();
+  }
+
+  Future<void> toggleFavorite() async {
+    try {
+      _toggleFavorite();
+
+      final response = await http.patch(
+        Uri.parse('${Constants.productsBaseUrl}/$id.json'),
+        body: jsonEncode({"isFavorite": isFavorite}),
+      );
+
+      if (response.statusCode >= 400) {
+        throw HttpException(
+          msg:
+              'Could not ${!isFavorite ? 'favorite product' : 'remove product from favorites'}. Try again later!',
+          statusCode: response.statusCode,
+        );
+      }
+    } on HttpException {
+      _toggleFavorite();
+      rethrow;
+    }
   }
 }

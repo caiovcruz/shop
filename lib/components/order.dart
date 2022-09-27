@@ -27,21 +27,17 @@ class _OrderWidgetState extends State<OrderWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Card(
       child: Column(
         children: [
           ListTile(
+            onTap: () => setState(() => _expanded = !_expanded),
             title: Text('R\$${widget.order.total.toStringAsFixed(2)}'),
             subtitle:
                 Text(DateFormat('dd/MM/yyyy hh:mm').format(widget.order.date)),
-            trailing: IconButton(
-              onPressed: () {
-                setState(() {
-                  _expanded = !_expanded;
-                });
-              },
-              icon: const Icon(Icons.expand_more),
-            ),
+            trailing: Icon(_expanded ? Icons.expand_less : Icons.expand_more),
           ),
           if (_expanded)
             Container(
@@ -55,27 +51,41 @@ class _OrderWidgetState extends State<OrderWidget> {
                     .map((product) => Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              product.name,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            FittedBox(
+                            SizedBox(
+                              width: size.width * 0.4,
                               child: Text(
-                                '${product.quantity}x R\$${product.price}',
+                                product.name,
+                                overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
                                   fontSize: 18,
-                                  color: Colors.grey,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
-                            FittedBox(
-                              child: Text(
-                                'R\$${(product.quantity * product.price).toStringAsFixed(2)}',
-                                style: const TextStyle(
-                                  fontSize: 18,
+                            SizedBox(width: size.width * 0.05),
+                            SizedBox(
+                              width: size.width * 0.2,
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  '${product.quantity}x R\$${product.price.toStringAsFixed(2)}',
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: size.width * 0.05),
+                            SizedBox(
+                              width: size.width * 0.2,
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  'R\$${(product.quantity * product.price).toStringAsFixed(2)}',
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                  ),
                                 ),
                               ),
                             ),

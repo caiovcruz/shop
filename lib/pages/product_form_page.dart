@@ -23,6 +23,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
   final _formKey = GlobalKey<FormState>();
   final _formData = <String, Object>{};
 
+  bool _isLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -61,18 +63,42 @@ class _ProductFormPageState extends State<ProductFormPage> {
     setState(() {});
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (_formKey.currentState?.validate() ?? false) {
       _formKey.currentState?.save();
 
-      Provider.of<ProductList>(context, listen: false).saveProduct(_formData);
+      setState(() => _isLoading = true);
 
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Product successfully created!'),
-        duration: Duration(seconds: 2),
-      ));
+      try {
+        await Provider.of<ProductList>(context, listen: false)
+            .saveProduct(_formData);
 
-      Navigator.of(context).pop();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(
+                'Product successfully ${_formData['id'] != null ? 'updated' : 'created'}!'),
+            duration: const Duration(seconds: 2),
+          ));
+
+          Navigator.of(context).pop();
+        }
+      } catch (error) {
+        await showDialog<void>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('An error has ocurred!'),
+            content: const Text('An error has ocurred on save product.'),
+            actions: [
+              TextButton(
+                child: const Text('OK'),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+        );
+      } finally {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -91,92 +117,97 @@ class _ProductFormPageState extends State<ProductFormPage> {
           )
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(15),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                initialValue: _formData['name']?.toString(),
-                decoration: const InputDecoration(labelText: 'Name'),
-                textInputAction: TextInputAction.next,
-                onFieldSubmitted: (_) =>
-                    FocusScope.of(context).requestFocus(_priceFocus),
-                onSaved: (name) => _formData['name'] = name ?? '',
-                validator: nameValidator,
-              ),
-              TextFormField(
-                initialValue: _formData['price']?.toString(),
-                decoration: const InputDecoration(labelText: 'Price'),
-                textInputAction: TextInputAction.next,
-                focusNode: _priceFocus,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                onFieldSubmitted: (_) =>
-                    FocusScope.of(context).requestFocus(_descriptionFocus),
-                onSaved: (price) =>
-                    _formData['price'] = double.parse(price ?? '0'),
-                validator: priceValidator,
-              ),
-              TextFormField(
-                initialValue: _formData['description']?.toString(),
-                decoration: const InputDecoration(labelText: 'Description'),
-                focusNode: _descriptionFocus,
-                keyboardType: TextInputType.multiline,
-                maxLines: 3,
-                onFieldSubmitted: (_) =>
-                    FocusScope.of(context).requestFocus(_imageUrlFocus),
-                onSaved: (description) =>
-                    _formData['description'] = description ?? '',
-                validator: descriptionValidator,
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _imageUrlController,
-                      decoration:
-                          const InputDecoration(labelText: 'Image\'s URL'),
-                      textInputAction: TextInputAction.done,
-                      focusNode: _imageUrlFocus,
-                      keyboardType: TextInputType.url,
-                      onSaved: (imageUrl) =>
-                          _formData['imageUrl'] = imageUrl ?? '',
-                      validator: imageUrlValidator,
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : Padding(
+              padding: const EdgeInsets.all(15),
+              child: Form(
+                key: _formKey,
+                child: ListView(
+                  children: [
+                    TextFormField(
+                      initialValue: _formData['name']?.toString(),
+                      decoration: const InputDecoration(labelText: 'Name'),
+                      textInputAction: TextInputAction.next,
+                      onFieldSubmitted: (_) =>
+                          FocusScope.of(context).requestFocus(_priceFocus),
+                      onSaved: (name) => _formData['name'] = name ?? '',
+                      validator: nameValidator,
                     ),
-                  ),
-                  ImageModal(
-                    imageName: _formData['name']?.toString() ??
-                        'Image loaded from URL',
-                    imageUrl: _imageUrlController.text,
-                    child: Container(
-                      height: 100,
-                      width: 100,
-                      margin: const EdgeInsets.only(top: 10, left: 10),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.grey,
-                          width: 1,
-                        ),
+                    TextFormField(
+                      initialValue: _formData['price']?.toString(),
+                      decoration: const InputDecoration(labelText: 'Price'),
+                      textInputAction: TextInputAction.next,
+                      focusNode: _priceFocus,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
                       ),
-                      alignment: Alignment.center,
-                      child: _imageUrlController.text.isEmpty
-                          ? const Text('Enter an URL')
-                          : FittedBox(
-                              fit: BoxFit.contain,
-                              child: Image.network(_imageUrlController.text),
-                            ),
+                      onFieldSubmitted: (_) => FocusScope.of(context)
+                          .requestFocus(_descriptionFocus),
+                      onSaved: (price) =>
+                          _formData['price'] = double.parse(price ?? '0'),
+                      validator: priceValidator,
                     ),
-                  ),
-                ],
+                    TextFormField(
+                      initialValue: _formData['description']?.toString(),
+                      decoration:
+                          const InputDecoration(labelText: 'Description'),
+                      focusNode: _descriptionFocus,
+                      keyboardType: TextInputType.multiline,
+                      maxLines: 3,
+                      onFieldSubmitted: (_) =>
+                          FocusScope.of(context).requestFocus(_imageUrlFocus),
+                      onSaved: (description) =>
+                          _formData['description'] = description ?? '',
+                      validator: descriptionValidator,
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _imageUrlController,
+                            decoration: const InputDecoration(
+                                labelText: 'Image\'s URL'),
+                            textInputAction: TextInputAction.done,
+                            focusNode: _imageUrlFocus,
+                            keyboardType: TextInputType.url,
+                            onSaved: (imageUrl) =>
+                                _formData['imageUrl'] = imageUrl ?? '',
+                            validator: imageUrlValidator,
+                          ),
+                        ),
+                        ImageModal(
+                          imageName: _formData['name']?.toString() ??
+                              'Image loaded from URL',
+                          imageUrl: _imageUrlController.text,
+                          child: Container(
+                            height: 100,
+                            width: 100,
+                            margin: const EdgeInsets.only(top: 10, left: 10),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Colors.grey,
+                                width: 1,
+                              ),
+                            ),
+                            alignment: Alignment.center,
+                            child: _imageUrlController.text.isEmpty
+                                ? const Text('Enter an URL')
+                                : Image.network(
+                                    _imageUrlController.text,
+                                    fit: BoxFit.contain,
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 
