@@ -93,17 +93,15 @@ class CartItemWidget extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              child: product?.imageUrl != null
-                  ? Image.network(
-                      product!.imageUrl,
-                      fit: BoxFit.contain,
-                    )
-                  : const Icon(
-                      Icons.image_not_supported_outlined,
-                      color: Colors.white,
-                    ),
+            leading: ClipOval(
+              child: FadeInImage(
+                placeholder:
+                    const AssetImage('assets/images/image-coming-soon.png'),
+                image: NetworkImage(product?.imageUrl ?? ''),
+                imageErrorBuilder: (ctx, error, stackTrace) =>
+                    Image.asset('assets/images/image-coming-soon.png'),
+                fit: BoxFit.contain,
+              ),
             ),
             title: Text(cartItem.name),
             subtitle: Column(

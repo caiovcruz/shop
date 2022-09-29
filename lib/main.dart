@@ -15,6 +15,7 @@ import 'pages/product_form_page.dart';
 import 'pages/products_overview_page.dart';
 import 'pages/products_page.dart';
 import 'utils/app_routes.dart';
+import 'utils/custom_route.dart';
 
 void main() {
   runApp(const MyApp());
@@ -80,6 +81,12 @@ class MyApp extends StatelessWidget {
                 centerTitle: true,
               ),
           fontFamily: 'Lato',
+          pageTransitionsTheme: PageTransitionsTheme(
+            builders: {
+              TargetPlatform.android: CustomPageTransitionsBuilder(),
+              TargetPlatform.iOS: CustomPageTransitionsBuilder(),
+            },
+          ),
         ),
         routes: {
           AppRoutes.authOrHome: (_) => const AuthOrPage(

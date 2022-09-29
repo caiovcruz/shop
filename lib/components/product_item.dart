@@ -28,8 +28,15 @@ class ProductItem extends StatelessWidget {
       leading: ImageModal(
         imageName: product.name,
         imageUrl: product.imageUrl,
-        child: CircleAvatar(
-          backgroundImage: NetworkImage(product.imageUrl),
+        child: ClipOval(
+          child: FadeInImage(
+            placeholder:
+                const AssetImage('assets/images/image-coming-soon.png'),
+            image: NetworkImage(product.imageUrl),
+            imageErrorBuilder: (ctx, error, stackTrace) =>
+                Image.asset('assets/images/image-coming-soon.png'),
+            fit: BoxFit.contain,
+          ),
         ),
       ),
       title: Text(product.name),

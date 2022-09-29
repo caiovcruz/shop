@@ -28,24 +28,28 @@ class _OrderWidgetState extends State<OrderWidget> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final itemsHeight = (order.products.length * 25.0) + 10;
 
-    return Card(
-      child: Column(
-        children: [
-          ListTile(
-            onTap: () => setState(() => _expanded = !_expanded),
-            title: Text('R\$${widget.order.total.toStringAsFixed(2)}'),
-            subtitle:
-                Text(DateFormat('dd/MM/yyyy hh:mm').format(widget.order.date)),
-            trailing: Icon(_expanded ? Icons.expand_less : Icons.expand_more),
-          ),
-          if (_expanded)
-            Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      height: _expanded ? itemsHeight + 80 : 80,
+      child: Card(
+        child: Column(
+          children: [
+            ListTile(
+              onTap: () => setState(() => _expanded = !_expanded),
+              title: Text('R\$${widget.order.total.toStringAsFixed(2)}'),
+              subtitle: Text(
+                  DateFormat('dd/MM/yyyy hh:mm').format(widget.order.date)),
+              trailing: Icon(_expanded ? Icons.expand_less : Icons.expand_more),
+            ),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
               padding: const EdgeInsets.symmetric(
                 horizontal: 15,
                 vertical: 4,
               ),
-              height: (order.products.length * 25) + 10,
+              height: _expanded ? itemsHeight : 0,
               child: ListView(
                 children: order.products
                     .map((product) => Row(
@@ -94,7 +98,8 @@ class _OrderWidgetState extends State<OrderWidget> {
                     .toList(),
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }

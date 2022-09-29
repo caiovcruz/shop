@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photo_view/photo_view.dart';
 
 class ImageModal extends StatelessWidget {
   final String imageName;
@@ -38,30 +39,14 @@ class ImageModal extends StatelessWidget {
                   ],
                 ),
               ),
-              Container(
-                height: size.width * 0.7,
-                width: size.width * 0.7,
-                decoration: BoxDecoration(
-                  border: imageUrl.isEmpty
-                      ? Border.all(
-                          color: Theme.of(context).errorColor,
-                          width: 2,
-                        )
-                      : null,
-                ),
-                child: Center(
-                  child: imageUrl.isEmpty
-                      ? Text(
-                          'Image URL not provided',
-                          style: TextStyle(
-                            color: Theme.of(context).errorColor,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      : Image.network(
-                          imageUrl,
-                          fit: BoxFit.contain,
-                        ),
+              Center(
+                child: SizedBox(
+                  height: size.width * 0.7,
+                  width: size.width * 0.7,
+                  child: PhotoView(
+                    imageProvider: NetworkImage(imageUrl),
+                    minScale: 0.47,
+                  ),
                 ),
               ),
             ],
