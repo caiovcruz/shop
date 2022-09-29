@@ -26,6 +26,21 @@ class TextFieldValidator {
         : null;
   }
 
+    static match(
+    String fieldName,
+    String fieldValue,
+    String matchFieldValue,
+  ) {
+    return fieldValue != matchFieldValue ? '$fieldName is not matching' : null;
+  }
+
+    static email(
+    String fieldName,
+    String fieldValue,
+  ) {
+    return !fieldValue.contains('@') ? '$fieldName is valid' : null;
+  }
+
   static greaterThan(
     String fieldName,
     String fieldValue,

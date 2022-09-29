@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 class Search extends StatelessWidget {
+  final String hintText;
   final void Function(String) onSearch;
 
   const Search({
     Key? key,
+    required this.hintText,
     required this.onSearch,
   }) : super(key: key);
 
@@ -24,7 +26,7 @@ class Search extends StatelessWidget {
             borderSide: const BorderSide(color: Colors.red),
           ),
           prefixIcon: const Icon(Icons.search),
-          hintText: "Search on Shop",
+          hintText: hintText,
         ),
         onChanged: (value) => onSearch(value),
       ),

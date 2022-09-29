@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+import 'models/auth.dart';
 import 'models/cart.dart';
 import 'models/order_list.dart';
 import 'models/product_list.dart';
+import 'pages/auth_or_page.dart';
+import 'pages/auth_page.dart';
 import 'pages/cart_page.dart';
 import 'pages/orders_page.dart';
 import 'pages/product_detail_page.dart';
@@ -31,13 +34,37 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
+          create: (_) => Auth(),
+        ),
+        ChangeNotifierProxyProvider<Auth, ProductList>(
           create: (_) => ProductList(),
+          update: (ctx, auth, previous) {
+            return ProductList(
+              auth.token ?? '',
+              auth.userId ?? '',
+              previous?.items ?? [],
+            );
+          },
         ),
-        ChangeNotifierProvider(
+        ChangeNotifierProxyProvider<Auth, Cart>(
           create: (_) => Cart(),
+          update: (ctx, auth, previous) {
+            return Cart(
+              auth.token ?? '',
+              auth.userId ?? '',
+              previous?.items ?? {},
+            );
+          },
         ),
-        ChangeNotifierProvider(
+        ChangeNotifierProxyProvider<Auth, OrderList>(
           create: (_) => OrderList(),
+          update: (ctx, auth, previous) {
+            return OrderList(
+              auth.token ?? '',
+              auth.userId ?? '',
+              previous?.items ?? [],
+            );
+          },
         ),
       ],
       child: MaterialApp(
@@ -55,13 +82,18 @@ class MyApp extends StatelessWidget {
           fontFamily: 'Lato',
         ),
         routes: {
-          AppRoutes.home: (_) => const ProductsOverviewPage(),
-          AppRoutes.productsOverview: (_) => const ProductsOverviewPage(),
-          AppRoutes.productDetail: (_) => const ProductDetailPage(),
-          AppRoutes.cart: (_) => const CartPage(),
-          AppRoutes.orders: (_) => const OrdersPage(),
-          AppRoutes.products: (_) => const ProductsPage(),
-          AppRoutes.productForm: (_) => const ProductFormPage(),
+          AppRoutes.authOrHome: (_) => const AuthOrPage(
+                page: ProductsOverviewPage(),
+              ),
+          AppRoutes.productsOverview: (_) =>
+              const AuthOrPage(page: ProductsOverviewPage()),
+          AppRoutes.productDetail: (_) =>
+              const AuthOrPage(page: ProductDetailPage()),
+          AppRoutes.cart: (_) => const AuthOrPage(page: CartPage()),
+          AppRoutes.orders: (_) => const AuthOrPage(page: OrdersPage()),
+          AppRoutes.products: (_) => const AuthOrPage(page: ProductsPage()),
+          AppRoutes.productForm: (_) =>
+              const AuthOrPage(page: ProductFormPage()),
         },
       ),
     );

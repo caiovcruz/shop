@@ -9,7 +9,15 @@ import 'cart.dart';
 import 'order.dart';
 
 class OrderList with ChangeNotifier {
-  final List<Order> _items = [];
+  final String _token;
+  final String _userId;
+  final List<Order> _items;
+
+  OrderList([
+    this._token = '',
+    this._userId = '',
+    this._items = const [],
+  ]);
 
   List<Order> get items => [..._items];
 
@@ -19,7 +27,7 @@ class OrderList with ChangeNotifier {
     _items.clear();
 
     final response = await http.get(
-      Uri.parse('${Constants.ordersBaseUrl}.json'),
+      Uri.parse('${Constants.ordersBaseUrl}/$_userId.json?auth=$_token'),
     );
 
     if (response.body == 'null') return;
@@ -50,7 +58,7 @@ class OrderList with ChangeNotifier {
     final date = DateTime.now();
 
     final response = await http.post(
-      Uri.parse('${Constants.ordersBaseUrl}.json'),
+      Uri.parse('${Constants.ordersBaseUrl}/$_userId.json?auth=$_token'),
       body: jsonEncode({
         "total": cart.totalAmount,
         "products": cart.items.values

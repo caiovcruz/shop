@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shop/components/quantity.dart';
 
 import '../components/badge.dart';
+import '../exceptions/http_exception.dart';
 import '../models/cart.dart';
 import '../models/product.dart';
 import '../utils/app_routes.dart';
@@ -29,6 +30,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   Widget build(BuildContext context) {
     final product = ModalRoute.of(context)?.settings.arguments as Product;
     final cart = Provider.of<Cart>(context, listen: false);
+    final messenger = ScaffoldMessenger.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -88,20 +90,31 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: const Text('Product successfully added to cart!'),
-                  duration: const Duration(seconds: 2),
-                  action: SnackBarAction(
-                    label: 'UNDO',
-                    textColor: Theme.of(context).colorScheme.primary,
-                    onPressed: () => cart.removeSingleItem(
-                      product.id,
-                      quantity: itemQuantity,
-                    ),
-                  ),
-                ));
-                cart.addItem(product, quantity: itemQuantity);
+              onPressed: () async {
+                try {
+                  await cart.addItem(product, quantity: itemQuantity);
+
+                  if (mounted) {
+                    messenger.showSnackBar(SnackBar(
+                      content:
+                          const Text('Product successfully added to cart!'),
+                      duration: const Duration(seconds: 2),
+                      action: SnackBarAction(
+                        label: 'UNDO',
+                        textColor: Theme.of(context).colorScheme.primary,
+                        onPressed: () => cart.removeSingleItem(
+                          product.id,
+                          quantity: itemQuantity,
+                        ),
+                      ),
+                    ));
+                  }
+                } on HttpException catch (error) {
+                  messenger.showSnackBar(SnackBar(
+                    content: Text(error.msg),
+                    duration: const Duration(seconds: 2),
+                  ));
+                }
               },
             ),
           ],

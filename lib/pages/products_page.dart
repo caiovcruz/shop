@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../components/app_drawer.dart';
 import '../components/product_item.dart';
+import '../components/search.dart';
 import '../models/product_list.dart';
 import '../utils/app_routes.dart';
 
@@ -36,7 +37,10 @@ class _ProductsPageState extends State<ProductsPage> {
     return Scaffold(
       drawer: const AppDrawer(),
       appBar: AppBar(
-        title: const Text('Manage Products'),
+        title: Search(
+          hintText: 'Search managed products',
+          onSearch: (search) => products.onSearchProduct(search),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),

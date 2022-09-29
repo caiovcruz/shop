@@ -3,4 +3,5 @@ class Constants {
   static const productsBaseUrl = '$_baseUrl/products';
   static const cartsBaseUrl = '$_baseUrl/carts';
   static const ordersBaseUrl = '$_baseUrl/orders';
+  static const userFavoritesBaseUrl = '$_baseUrl/userFavorites';
 }

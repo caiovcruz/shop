@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../exceptions/http_exception.dart';
 import '../models/cart.dart';
 import '../models/order_list.dart';
+import '../utils/app_routes.dart';
 
 class CartTotal extends StatefulWidget {
   final Cart cart;
@@ -65,7 +66,7 @@ class _CartTotalState extends State<CartTotal> {
                               listen: false,
                             ).addOrder(widget.cart);
 
-                            widget.cart.clear();
+                            await widget.cart.clear();
 
                             messenger.showSnackBar(const SnackBar(
                               content: Text('Order successfully placed!'),
@@ -73,6 +74,11 @@ class _CartTotalState extends State<CartTotal> {
                             ));
 
                             setState(() => _isLoading = false);
+
+                            if (mounted) {
+                              Navigator.of(context)
+                                  .pushReplacementNamed(AppRoutes.orders);
+                            }
                           }
                         : null,
                     style: TextButton.styleFrom(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:collection/collection.dart';
 
+import '../exceptions/http_exception.dart';
 import '../models/cart.dart';
 import '../models/cart_item.dart';
 import '../models/product_list.dart';
@@ -22,13 +23,24 @@ class CartItemWidget extends StatelessWidget {
         .items
         .firstWhereOrNull((prod) => prod.id == cartItem.productId);
 
-    _changeItemQuantity(int quantity) {
+    final messenger = ScaffoldMessenger.of(context);
+
+    _changeItemQuantity(int quantity) async {
       if (product != null) {
-        Provider.of<Cart>(context, listen: false).addItem(
-          product,
-          quantity: quantity,
-          isAbsolutQuantity: true,
-        );
+        try {
+          await Provider.of<Cart>(context, listen: false).addItem(
+            product,
+            quantity: quantity,
+            isAbsolutQuantity: true,
+          );
+        } on HttpException catch (error) {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(error.msg),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
       }
     }
 
@@ -48,11 +60,20 @@ class CartItemWidget extends StatelessWidget {
           color: Theme.of(context).colorScheme.secondary,
         ),
       ),
-      onDismissed: (_) {
-        Provider.of<Cart>(
-          context,
-          listen: false,
-        ).removeItem(cartItem.productId);
+      onDismissed: (_) async {
+        try {
+          await Provider.of<Cart>(
+            context,
+            listen: false,
+          ).removeItem(cartItem.productId);
+        } on HttpException catch (error) {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(error.msg),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
       },
       confirmDismiss: (_) {
         return showDialog<bool>(

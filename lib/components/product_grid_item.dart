@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../exceptions/http_exception.dart';
+import '../models/auth.dart';
 import '../models/product.dart';
 import '../utils/app_routes.dart';
 
@@ -11,6 +12,7 @@ class ProductGridItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final product = Provider.of<Product>(context, listen: false);
+    final auth = Provider.of<Auth>(context, listen: false);
     final messenger = ScaffoldMessenger.of(context);
 
     return ClipRRect(
@@ -44,19 +46,16 @@ class ProductGridItem extends StatelessWidget {
               ),
               GridTileBar(
                 backgroundColor: Theme.of(context).colorScheme.tertiary,
-                title: Text(
-                  product.name,
-                  textAlign: TextAlign.center,
-                ),
-                subtitle: Text(
-                  'R\$${product.price.toStringAsFixed(2)}',
-                  textAlign: TextAlign.center,
-                ),
+                title: Text(product.name),
+                subtitle: Text('R\$${product.price.toStringAsFixed(2)}'),
                 trailing: Consumer<Product>(builder: (cxt, product, _) {
                   return IconButton(
                     onPressed: () async {
                       try {
-                        await product.toggleFavorite();
+                        await product.toggleFavorite(
+                          auth.token ?? '',
+                          auth.userId ?? '',
+                        );
 
                         messenger.showSnackBar(SnackBar(
                           content: Text(product.isFavorite

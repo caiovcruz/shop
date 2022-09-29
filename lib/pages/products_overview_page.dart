@@ -35,7 +35,14 @@ class _ProductsOverviewPageState extends State<ProductsOverviewPage> {
   @override
   void initState() {
     super.initState();
-    _refreshProducts(context).then((_) => setState(() => _isLoading = false));
+
+    _refreshProducts(context).then((_) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    });
+
+    Provider.of<Cart>(context, listen: false).loadCart();
   }
 
   @override
@@ -46,7 +53,8 @@ class _ProductsOverviewPageState extends State<ProductsOverviewPage> {
       drawer: const AppDrawer(),
       appBar: AppBar(
         title: Search(
-          onSearch: provider.onSearchProduct,
+          hintText: 'Search on Shop',
+          onSearch: (search) => provider.onSearchProduct(search),
         ),
         centerTitle: true,
         actions: [
