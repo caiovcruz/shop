@@ -17,7 +17,8 @@ class AuthForm extends StatefulWidget {
   State<AuthForm> createState() => _AuthFormState();
 }
 
-class _AuthFormState extends State<AuthForm> {
+class _AuthFormState extends State<AuthForm>
+    with SingleTickerProviderStateMixin {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
@@ -29,13 +30,73 @@ class _AuthFormState extends State<AuthForm> {
     'password': '',
   };
 
+  AnimationController? _animationController;
+  // Animation<Size>? _heightAnimation;
+  Animation<double>? _opacityAnimation;
+  Animation<Offset>? _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+
+    // _heightAnimation = Tween(
+    //   begin: const Size(double.infinity, 310),
+    //   end: const Size(double.infinity, 400),
+    // ).animate(
+    //   CurvedAnimation(
+    //     parent: _animationController!,
+    //     curve: Curves.linear,
+    //   ),
+    // );
+
+    // _heightAnimation?.addListener(() => setState(() {}));
+
+    _opacityAnimation = Tween(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController!,
+        curve: Curves.linear,
+      ),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, -1.5),
+      end: const Offset(0, 0),
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController!,
+        curve: Curves.linear,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _animationController?.dispose();
+  }
+
   AuthMode _authMode = AuthMode.signIn;
   bool get isSignIn => _authMode == AuthMode.signIn;
   bool get isSignUp => _authMode == AuthMode.signUp;
 
   void _switchAuthMode() {
     setState(() {
-      _authMode = isSignIn ? AuthMode.signUp : AuthMode.signIn;
+      // _authMode = isSignIn ? AuthMode.signUp : AuthMode.signIn;
+      if (isSignIn) {
+        _authMode = AuthMode.signUp;
+        _animationController?.forward();
+      } else {
+        _authMode = AuthMode.signIn;
+        _animationController?.reverse();
+      }
     });
   }
 
@@ -107,9 +168,12 @@ class _AuthFormState extends State<AuthForm> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeIn,
         padding: const EdgeInsets.all(16),
         height: isSignIn ? 310 : 400,
+        // height: _heightAnimation?.value.height ?? (isSignIn ? 310 : 400),
         width: size.width * 0.75,
         child: Form(
           key: _formKey,
@@ -141,24 +205,38 @@ class _AuthFormState extends State<AuthForm> {
                     isSignUp ? TextInputAction.next : TextInputAction.done,
                 onFieldSubmitted: (_) => isSignIn ? _submit() : null,
               ),
-              if (isSignUp)
-                TextFormField(
-                  decoration: InputDecoration(
-                    labelText: 'Confirm Password',
-                    suffixIcon: IconButton(
-                      onPressed: () => setState(
-                          () => _showConfirmPassword = !_showConfirmPassword),
-                      icon: Icon(_showConfirmPassword
-                          ? Icons.visibility_off
-                          : Icons.visibility),
+              AnimatedContainer(
+                constraints: BoxConstraints(
+                  minHeight: isSignIn ? 0 : 60,
+                  maxHeight: isSignIn ? 0 : 120,
+                ),
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.linear,
+                child: FadeTransition(
+                  opacity: _opacityAnimation!,
+                  child: SlideTransition(
+                    position: _slideAnimation!,
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        labelText: 'Confirm Password',
+                        suffixIcon: IconButton(
+                          onPressed: () => setState(() =>
+                              _showConfirmPassword = !_showConfirmPassword),
+                          icon: Icon(_showConfirmPassword
+                              ? Icons.visibility_off
+                              : Icons.visibility),
+                        ),
+                      ),
+                      obscureText: _showConfirmPassword ? false : true,
+                      validator: isSignUp ? confirmPasswordValidator : null,
+                      textInputAction: isSignUp
+                          ? TextInputAction.done
+                          : TextInputAction.none,
+                      onFieldSubmitted: (_) => isSignUp ? _submit() : null,
                     ),
                   ),
-                  obscureText: _showConfirmPassword ? false : true,
-                  validator: isSignUp ? confirmPasswordValidator : null,
-                  textInputAction:
-                      isSignUp ? TextInputAction.done : TextInputAction.none,
-                  onFieldSubmitted: (_) => isSignUp ? _submit() : null,
                 ),
+              ),
               const SizedBox(height: 20),
               _isLoading
                   ? const Center(
